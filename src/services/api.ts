@@ -68,7 +68,8 @@ export const timersApi = {
   pause: (id: string) => api.post(`/timers/${id}/pause`),
   resume: (id: string) => api.post(`/timers/${id}/resume`),
   stop: (id: string) => api.post(`/timers/${id}/stop`),
-  update: (id: string, data: UpdateTimerDto) => api.patch(`/timers/${id}`, data),
+  update: (timerId: string, data: UpdateTimerDto) =>
+    api.patch(`/timers/${timerId}`, data),
   getStatistics: (period: string, paidFilter: string) => 
     api.get(`/timers/statistics/${period}`, { params: { paidFilter } }),
   markAllPaid: (projectId: string) => 
