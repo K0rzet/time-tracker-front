@@ -1,4 +1,4 @@
-import { AppShell, Button, Group, Tabs, Stack, Text } from '@mantine/core'
+import { AppShell, Button, Group, Tabs, Stack } from '@mantine/core'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useMediaQuery } from '@mantine/hooks'

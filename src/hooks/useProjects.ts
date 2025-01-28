@@ -1,5 +1,21 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { projectsApi } from '../services/api'
+import { notifications } from '@mantine/notifications'
+
+interface CreateProjectData {
+  name: string
+  description?: string
+  categoryId?: string
+}
+
+interface UpdateProjectData {
+  id: string
+  data: {
+    name: string
+    description?: string
+    categoryId?: string
+  }
+}
 
 export const useProjects = () => {
   const queryClient = useQueryClient()
@@ -13,18 +29,26 @@ export const useProjects = () => {
   })
 
   const createMutation = useMutation({
-    mutationFn: (data: { name: string; description?: string }) =>
-      projectsApi.create(data),
+    mutationFn: (data: CreateProjectData) => projectsApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
+      notifications.show({
+        title: 'Успешно',
+        message: 'Проект создан',
+        color: 'green',
+      })
     },
   })
 
   const updateMutation = useMutation({
-    mutationFn: (params: { id: string; data: { name?: string; description?: string } }) =>
-      projectsApi.update(params.id, params.data),
+    mutationFn: ({ id, data }: UpdateProjectData) => projectsApi.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
+      notifications.show({
+        title: 'Успешно',
+        message: 'Проект обновлен',
+        color: 'green',
+      })
     },
   })
 
@@ -32,6 +56,11 @@ export const useProjects = () => {
     mutationFn: (id: string) => projectsApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
+      notifications.show({
+        title: 'Успешно',
+        message: 'Проект удален',
+        color: 'green',
+      })
     },
   })
 
