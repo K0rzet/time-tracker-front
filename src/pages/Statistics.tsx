@@ -1,11 +1,13 @@
-import { Container, Title, SegmentedControl, Paper, Table, Radio, Text, Group, Stack, Badge, Box } from '@mantine/core'
+import { Container, Title, SegmentedControl, Paper, Table, Radio, Text, Group, Stack, Badge, Box, ActionIcon, Collapse } from '@mantine/core'
 import { useState } from 'react'
 import { useStatistics, Period, PaidFilter } from '../hooks/useStatistics'
 import { useMediaQuery } from '@mantine/hooks'
+import { IconChevronUp, IconChevronDown } from '@tabler/icons-react'
 
 export function Statistics() {
   const [period, setPeriod] = useState<Period>('week')
   const [paidFilter, setPaidFilter] = useState<PaidFilter>('all')
+  const [expandedProjects, setExpandedProjects] = useState<string[]>([])
   const { statistics, isLoading, formatTime, formatDate } = useStatistics(period, paidFilter)
   const isMobile = useMediaQuery('(max-width: 768px)')
 
@@ -15,6 +17,14 @@ export function Statistics() {
     { label: 'Год', value: 'year' },
     { label: 'Все', value: 'all' },
   ]
+
+  const toggleProject = (projectId: string) => {
+    setExpandedProjects(prev => 
+      prev.includes(projectId) 
+        ? prev.filter(id => id !== projectId)
+        : [...prev, projectId]
+    )
+  }
 
   return (
     <Container size="lg">
@@ -75,51 +85,74 @@ export function Statistics() {
         {statistics?.projectStats && statistics.projectStats.length > 0 ? (
           <Stack gap="lg">
             {statistics.projectStats.map((project) => (
-              <Paper key={project.id} shadow="xs" p="md">
+              <Paper 
+                key={project.id} 
+                shadow="xs" 
+                p="md"
+                onClick={() => toggleProject(project.id)}
+                style={{ cursor: 'pointer' }}
+              >
                 <Group justify="space-between" mb="xs">
                   <Title order={3}>{project.name}</Title>
-                  <Badge color={project.isPaid ? 'green' : 'red'}>
-                    {project.isPaid ? 'Оплачен' : 'Не оплачен'}
-                  </Badge>
+                  <Group>
+                    <Badge color={project.isPaid ? 'green' : 'red'}>
+                      {project.isPaid ? 'Оплачен' : 'Не оплачен'}
+                    </Badge>
+                    <ActionIcon 
+                      variant="subtle"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        toggleProject(project.id)
+                      }}
+                    >
+                      {expandedProjects.includes(project.id) ? (
+                        <IconChevronUp size={16} />
+                      ) : (
+                        <IconChevronDown size={16} />
+                      )}
+                    </ActionIcon>
+                  </Group>
                 </Group>
                 <Text mb="md">Общее время: {formatTime(project.totalTime)}</Text>
                 
-                <Box style={{ overflowX: 'auto' }}>
-                  <Table style={{ minWidth: isMobile ? 600 : 'auto' }}>
-                    <Table.Thead>
-                      <Table.Tr>
-                        <Table.Th>Таймер</Table.Th>
-                        <Table.Th>Начало</Table.Th>
-                        <Table.Th>Конец</Table.Th>
-                        <Table.Th>Время</Table.Th>
-                        <Table.Th>Статус</Table.Th>
-                      </Table.Tr>
-                    </Table.Thead>
-                    <Table.Tbody>
-                      {project.timers.map((timer) => (
-                        <Table.Tr key={timer.id}>
-                          <Table.Td style={{ whiteSpace: 'nowrap' }}>
-                            {timer.name || 'Без названия'}
-                          </Table.Td>
-                          <Table.Td style={{ whiteSpace: 'nowrap' }}>
-                            {formatDate(timer.startTime)}
-                          </Table.Td>
-                          <Table.Td style={{ whiteSpace: 'nowrap' }}>
-                            {timer.endTime ? formatDate(timer.endTime) : 'Активен'}
-                          </Table.Td>
-                          <Table.Td style={{ whiteSpace: 'nowrap' }}>
-                            {formatTime(timer.time)}
-                          </Table.Td>
-                          <Table.Td style={{ whiteSpace: 'nowrap' }}>
-                            <Badge color={timer.isPaid ? 'green' : 'red'}>
-                              {timer.isPaid ? 'Оплачен' : 'Не оплачен'}
-                            </Badge>
-                          </Table.Td>
+                <Collapse in={expandedProjects.includes(project.id)}>
+                  <Box style={{ overflowX: 'auto' }}>
+                    <Table style={{ minWidth: isMobile ? 600 : 'auto' }}>
+                      <Table.Thead>
+                        <Table.Tr>
+                          <Table.Th>Таймер</Table.Th>
+                          <Table.Th>Начало</Table.Th>
+                          <Table.Th>Конец</Table.Th>
+                          <Table.Th>Время</Table.Th>
+                          <Table.Th>Статус</Table.Th>
                         </Table.Tr>
-                      ))}
-                    </Table.Tbody>
-                  </Table>
-                </Box>
+                      </Table.Thead>
+                      <Table.Tbody>
+                        {project.timers.map((timer) => (
+                          <Table.Tr key={timer.id}>
+                            <Table.Td style={{ whiteSpace: 'nowrap' }}>
+                              {timer.name || 'Без названия'}
+                            </Table.Td>
+                            <Table.Td style={{ whiteSpace: 'nowrap' }}>
+                              {formatDate(timer.startTime)}
+                            </Table.Td>
+                            <Table.Td style={{ whiteSpace: 'nowrap' }}>
+                              {timer.endTime ? formatDate(timer.endTime) : 'Активен'}
+                            </Table.Td>
+                            <Table.Td style={{ whiteSpace: 'nowrap' }}>
+                              {formatTime(timer.time)}
+                            </Table.Td>
+                            <Table.Td style={{ whiteSpace: 'nowrap' }}>
+                              <Badge color={timer.isPaid ? 'green' : 'red'}>
+                                {timer.isPaid ? 'Оплачен' : 'Не оплачен'}
+                              </Badge>
+                            </Table.Td>
+                          </Table.Tr>
+                        ))}
+                      </Table.Tbody>
+                    </Table>
+                  </Box>
+                </Collapse>
               </Paper>
             ))}
           </Stack>

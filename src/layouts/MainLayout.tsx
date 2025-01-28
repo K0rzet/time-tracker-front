@@ -1,4 +1,4 @@
-import { AppShell, Button, Group, Tabs, Stack } from '@mantine/core'
+import { AppShell, Button, Group, Tabs, Stack, Text } from '@mantine/core'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useMediaQuery } from '@mantine/hooks'
@@ -11,6 +11,7 @@ export function MainLayout() {
   const navigate = useNavigate()
   const isMobile = useMediaQuery('(max-width: 768px)')
   const isTablet = useMediaQuery('(min-width: 769px) and (max-width: 1024px)')
+  const isVerySmallScreen = useMediaQuery('(max-width: 400px)')
 
   const handleLogout = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
@@ -46,21 +47,21 @@ export function MainLayout() {
                 leftSection={<IconLayoutDashboard size={20} />}
                 style={{ height: '100%' }}
               >
-                Проекты
+                {!isVerySmallScreen && 'Проекты'}
               </Tabs.Tab>
               <Tabs.Tab
                 value="/statistics"
                 leftSection={<IconChartBar size={20} />}
                 style={{ height: '100%' }}
               >
-                Статистика
+                {!isVerySmallScreen && 'Статистика'}
               </Tabs.Tab>
               <Tabs.Tab
                 value="/logout"
                 leftSection={<IconLogout size={20} />}
                 style={{ height: '100%' }}
               >
-                Выйти
+                {!isVerySmallScreen && 'Выйти'}
               </Tabs.Tab>
             </Tabs.List>
           </Tabs>
@@ -76,16 +77,22 @@ export function MainLayout() {
         padding="md"
       >
         <AppShell.Header>
-          <Group h="100%" px="md" justify="space-between">
-            <Group>
-              <Button component={Link} to="/projects" variant="subtle">
+          <Group h="100%" px="xs" justify="space-between" wrap="nowrap">
+            <Group style={{ flex: '0 1 auto', overflow: 'hidden' }} gap={4} wrap="nowrap">
+              <Button component={Link} to="/projects" variant="subtle" size="xs" style={{ padding: '0 8px' }}>
                 Проекты
               </Button>
-              <Button component={Link} to="/statistics" variant="subtle">
+              <Button component={Link} to="/statistics" variant="subtle" size="xs" style={{ padding: '0 8px' }}>
                 Статистика
               </Button>
             </Group>
-            <Button variant="subtle" color="red" onClick={handleLogout}>
+            <Button 
+              variant="subtle" 
+              color="red" 
+              onClick={handleLogout} 
+              size="xs"
+              style={{ padding: '0 8px', flexShrink: 0 }}
+            >
               Выйти
             </Button>
           </Group>

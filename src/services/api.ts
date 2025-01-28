@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { CreateProjectDto, UpdateProjectDto, CreateTimerDto, UpdateTimerDto } from '../types'
+import { CreateProjectDto, UpdateProjectDto, CreateTimerDto } from '../types'
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'https://api.time-tracker.ilyacode.ru'
 
@@ -51,12 +51,20 @@ export const authApi = {
   },
 }
 
+export const categoriesApi = {
+  getAll: () => api.get('/categories'),
+  create: (data: { name: string }) => api.post('/categories', data),
+  delete: (id: string) => api.delete(`/categories/${id}`),
+}
+
 export const projectsApi = {
-  getAll: () => api.get('/projects'),
+  getAll: (categoryId?: string) => api.get('/projects', { params: { categoryId } }),
   getOne: (id: string) => api.get(`/projects/${id}`),
   getProjectWithTimers: (id: string) => api.get(`/projects/${id}/timers`),
-  create: (data: CreateProjectDto) => api.post('/projects', data),
-  update: (id: string, data: UpdateProjectDto) => api.patch(`/projects/${id}`, data),
+  create: (data: { name: string; description?: string; categoryId?: string }) => 
+    api.post('/projects', data),
+  update: (id: string, data: { name: string; description?: string; categoryId?: string }) => 
+    api.put(`/projects/${id}`, data),
   delete: (id: string) => api.delete(`/projects/${id}`),
 }
 
@@ -68,8 +76,8 @@ export const timersApi = {
   pause: (id: string) => api.post(`/timers/${id}/pause`),
   resume: (id: string) => api.post(`/timers/${id}/resume`),
   stop: (id: string) => api.post(`/timers/${id}/stop`),
-  update: (timerId: string, data: UpdateTimerDto) =>
-    api.patch(`/timers/${timerId}`, data),
+  update: (id: string, data: { isPaid?: boolean; isLogged?: boolean }) => 
+    api.patch(`/timers/${id}`, data),
   getStatistics: (period: string, paidFilter: string) => 
     api.get(`/timers/statistics/${period}`, { params: { paidFilter } }),
   markAllPaid: (projectId: string) => 

@@ -1,14 +1,16 @@
-import { Modal, TextInput, Textarea, Button, Stack } from '@mantine/core'
+import { Modal, TextInput, Textarea, Button, Stack, Select } from '@mantine/core'
 import { useState, useEffect } from 'react'
+import { useCategories } from '../hooks/useCategories'
 
 interface ProjectFormModalProps {
   opened: boolean
   onClose: () => void
-  onSubmit: (data: { name: string; description?: string }) => void
+  onSubmit: (data: { name: string; description?: string; categoryId?: string }) => void
   isLoading: boolean
   initialData?: {
     name: string
     description?: string
+    categoryId?: string
   }
   mode: 'create' | 'edit'
 }
@@ -23,20 +25,28 @@ export function ProjectFormModal({
 }: ProjectFormModalProps) {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
+  const [categoryId, setCategoryId] = useState<string | undefined>(undefined)
+  const { categories } = useCategories()
 
   useEffect(() => {
     if (initialData) {
       setName(initialData.name)
       setDescription(initialData.description || '')
+      setCategoryId(initialData.categoryId)
     }
   }, [initialData])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit({ name, description: description || undefined })
+    onSubmit({ 
+      name, 
+      description,
+      categoryId 
+    })
     if (mode === 'create') {
       setName('')
       setDescription('')
+      setCategoryId(undefined)
     }
   }
 
@@ -54,6 +64,17 @@ export function ProjectFormModal({
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
+          />
+          <Select
+            label="Категория"
+            placeholder="Выберите категорию"
+            data={categories?.map(category => ({ 
+              value: category.id, 
+              label: category.name 
+            })) || []}
+            value={categoryId}
+            onChange={(value) => setCategoryId(value || undefined)}
+            clearable
           />
           <Textarea
             label="Описание"

@@ -4,9 +4,10 @@ export interface Timer {
   startTime: string
   endTime: string | null
   isPaused: boolean
-  isPaid: boolean
-  projectId: string
-  userId: string
   pausedAt: string | null
   totalPause: number
+  isPaid: boolean
+  isLogged: boolean
+  projectId: string
+  userId: string
 } 

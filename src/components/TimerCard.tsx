@@ -2,25 +2,24 @@ import { Card, Text, Group, Button, Menu, ActionIcon, Stack, Switch } from '@man
 import { IconDots, IconTrash } from '@tabler/icons-react'
 import { useEffect, useState } from 'react'
 
-interface Timer {
-  id: string
-  name: string
-  startTime: string
-  endTime: string | null
-  isPaused: boolean
-  pausedAt: string | null
-  totalPause: number
-  isPaid: boolean
-}
-
 interface TimerCardProps {
-  timer: Timer
+  timer: {
+    id: string
+    name: string
+    startTime: string
+    endTime: string | null
+    isPaused: boolean
+    pausedAt: string | null
+    totalPause: number
+    isPaid: boolean
+    isLogged: boolean
+  }
   onPause: (id: string) => void
   onResume: (id: string) => void
   onStop: (id: string) => void
-  onUpdate: (data: { id: string; data: any }) => void
+  onUpdate: (data: { id: string; isPaid?: boolean; isLogged?: boolean }) => void
   onDelete: (id: string) => void
-  calculateElapsedTime: (timer: Timer) => number
+  calculateElapsedTime: (timer: any) => number
 }
 
 export function TimerCard({
@@ -43,13 +42,19 @@ export function TimerCard({
     }
   }, [timer, calculateElapsedTime])
 
+  const handleDelete = () => {
+    onDelete(timer.id)
+  }
+
+  const handleUpdate = (field: 'isPaid' | 'isLogged', value: boolean) => {
+    onUpdate({ id: timer.id, [field]: value })
+  }
+
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)
-    const remainingSeconds = seconds % 60
-    return `${hours.toString().padStart(2, '0')}:${minutes
-      .toString()
-      .padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
+    const secs = seconds % 60
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
   const handlePause = () => {
@@ -62,19 +67,6 @@ export function TimerCard({
 
   const handleStop = () => {
     if (timer.id) onStop(timer.id)
-  }
-
-  const handleDelete = () => {
-    if (timer.id) onDelete(timer.id)
-  }
-
-  const handleUpdate = (checked: boolean) => {
-    if (timer.id) {
-      onUpdate({
-        id: timer.id,
-        data: { isPaid: checked }
-      })
-    }
   }
 
   return (
@@ -123,11 +115,18 @@ export function TimerCard({
           )}
         </Group>
 
-        <Switch
-          label="Оплачен"
-          checked={timer.isPaid}
-          onChange={(event) => handleUpdate(event.currentTarget.checked)}
-        />
+        <Stack gap="xs">
+          <Switch
+            label="Оплачен"
+            checked={timer.isPaid}
+            onChange={(event) => handleUpdate('isPaid', event.currentTarget.checked)}
+          />
+          <Switch
+            label="Занесен в таблицу"
+            checked={timer.isLogged}
+            onChange={(event) => handleUpdate('isLogged', event.currentTarget.checked)}
+          />
+        </Stack>
       </Stack>
     </Card>
   )

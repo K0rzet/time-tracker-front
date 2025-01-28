@@ -62,8 +62,8 @@ export function useTimers(projectId?: string) {
   })
 
   const updateTimer = useMutation({
-    mutationFn: (data: { id: string; data: any }) =>
-      timersApi.update(data.id, data.data),
+    mutationFn: (data: { id: string; isPaid?: boolean; isLogged?: boolean }) =>
+      timersApi.update(data.id, data),
     onSuccess: () => {
       if (projectId) {
         queryClient.invalidateQueries({ queryKey: ['project', projectId] })
@@ -111,7 +111,7 @@ export function useTimers(projectId?: string) {
     pauseTimer: pauseTimer.mutateAsync,
     resumeTimer: resumeTimer.mutateAsync,
     stopTimer: stopTimer.mutateAsync,
-    updateTimer: updateTimer.mutateAsync,
+    updateTimer: updateTimer.mutate,
     isCreating: createTimer.isPending,
     isDeleting: deleteTimer.isPending,
     isPausing: pauseTimer.isPending,

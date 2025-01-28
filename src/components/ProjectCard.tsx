@@ -1,5 +1,5 @@
-import { Card, Text, Group, ActionIcon, Menu, Stack } from '@mantine/core'
-import { IconDots, IconTrash } from '@tabler/icons-react'
+import { Card, Text, Group, ActionIcon, Menu, Stack, Badge } from '@mantine/core'
+import { IconDots, IconTrash, IconEdit } from '@tabler/icons-react'
 import { Link } from 'react-router-dom'
 
 interface ProjectCardProps {
@@ -8,12 +8,21 @@ interface ProjectCardProps {
     name: string
     description?: string
     totalTime?: number
+    timers?: Array<{ isPaid: boolean }>
+    category?: {
+      id: string
+      name: string
+    }
   }
   onDelete: (id: string) => void
+  onEdit: (project: { id: string; name: string; description?: string }) => void
   formatTime: (seconds: number) => string
 }
 
-export function ProjectCard({ project, onDelete, formatTime }: ProjectCardProps) {
+export function ProjectCard({ project, onDelete, onEdit, formatTime }: ProjectCardProps) {
+  const isProjectPaid = project.timers && project.timers.length > 0 && 
+    project.timers.every(timer => timer.isPaid)
+
   return (
     <Card 
       component={Link} 
@@ -32,9 +41,23 @@ export function ProjectCard({ project, onDelete, formatTime }: ProjectCardProps)
       <Stack justify="space-between" h="100%">
         <div>
           <Group justify="space-between" mb="xs">
-            <Text fw={500} size="lg">
-              {project.name}
-            </Text>
+            <Stack gap="xs">
+              <Group>
+                <Text fw={500} size="lg">
+                  {project.name}
+                </Text>
+                {project.timers && project.timers.length > 0 && (
+                  <Badge color={isProjectPaid ? 'green' : 'red'}>
+                    {isProjectPaid ? 'Оплачен' : 'Не оплачен'}
+                  </Badge>
+                )}
+              </Group>
+              {project.category && (
+                <Badge variant="light" color="blue">
+                  {project.category.name}
+                </Badge>
+              )}
+            </Stack>
             <Menu withinPortal position="bottom-end" shadow="sm">
               <Menu.Target>
                 <ActionIcon 
@@ -48,10 +71,19 @@ export function ProjectCard({ project, onDelete, formatTime }: ProjectCardProps)
               </Menu.Target>
               <Menu.Dropdown>
                 <Menu.Item
+                  leftSection={<IconEdit size={14} />}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    onEdit(project)
+                  }}
+                >
+                  Редактировать
+                </Menu.Item>
+                <Menu.Item
                   color="red"
                   leftSection={<IconTrash size={14} />}
                   onClick={(e) => {
-                    e.preventDefault() // Предотвращаем переход по ссылке при удалении
+                    e.preventDefault()
                     onDelete(project.id)
                   }}
                 >

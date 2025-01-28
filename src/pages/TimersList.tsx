@@ -98,10 +98,7 @@ export function TimersList() {
                 onPause={() => pauseTimer(timer.id)}
                 onResume={() => resumeTimer(timer.id)}
                 onStop={() => stopTimer(timer.id)}
-                onUpdate={(isPaid) => updateTimer({ 
-                  id: timer.id, 
-                  data: { isPaid } 
-                })}
+                onUpdate={(data) => updateTimer(data)}
                 onDelete={() => deleteTimer(timer.id)}
                 calculateElapsedTime={() => calculateElapsedTime(timer)}
               />
