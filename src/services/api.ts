@@ -1,7 +1,8 @@
 import axios from 'axios'
 import { CreateTimerDto } from '../types'
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'https://api.time-tracker.ilyacode.ru'
+// const BASE_URL = import.meta.env.VITE_API_URL || 'https://api.time-tracker.ilyacode.ru'
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3123'
 
 export const api = axios.create({
   baseURL: BASE_URL,
@@ -76,7 +77,7 @@ export const timersApi = {
   pause: (id: string) => api.post(`/timers/${id}/pause`),
   resume: (id: string) => api.post(`/timers/${id}/resume`),
   stop: (id: string) => api.post(`/timers/${id}/stop`),
-  update: (id: string, data: { isPaid?: boolean; isLogged?: boolean }) => 
+  update: (id: string, data: { name?: string; description?: string; startTime?: string; isPaid?: boolean; isLogged?: boolean }) => 
     api.patch(`/timers/${id}`, data),
   getStatistics: (period: string, paidFilter: string) => 
     api.get(`/timers/statistics/${period}`, { params: { paidFilter } }),

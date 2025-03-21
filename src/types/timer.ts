@@ -10,4 +10,5 @@ export interface Timer {
   isLogged: boolean
   projectId: string
   userId: string
+  updatedAt: string
 } 

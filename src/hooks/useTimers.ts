@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { timersApi } from '../services/api'
+import { notifications } from '@mantine/notifications'
 
 // interface Timer {
 //   id: string
@@ -62,12 +63,72 @@ export function useTimers(projectId?: string) {
   })
 
   const updateTimer = useMutation({
-    mutationFn: (data: { id: string; isPaid?: boolean; isLogged?: boolean }) =>
-      timersApi.update(data.id, data),
+    mutationFn: (data: { id: string; name?: string; description?: string; elapsed?: number; isPaid?: boolean; isLogged?: boolean }) => {
+      const { id, elapsed, description, ...updateData } = data
+      
+      // Если указано время, вычисляем новое значение startTime
+      if (elapsed !== undefined) {
+        // Получаем текущий таймер из кэша или запроса
+        let timer;
+        if (projectId) {
+          const project = queryClient.getQueryData(['project', projectId]) as any
+          timer = project?.timers?.find((t: any) => t.id === id)
+        }
+        
+        if (timer) {
+          // Если таймер остановлен
+          if (timer.endTime) {
+            const endTime = new Date(timer.endTime)
+            // Вычисляем новое startTime на основе endTime и elapsed
+            const newStartTime = new Date(endTime.getTime() - (elapsed * 1000) - (timer.totalPause * 1000))
+            
+            return timersApi.update(id, {
+              ...updateData,
+              startTime: newStartTime.toISOString()
+            })
+          } 
+          // Если таймер активен
+          else {
+            const now = new Date()
+            let totalPauseMs = timer.totalPause * 1000;
+            
+            // Если таймер на паузе, нужно учесть текущий период паузы
+            if (timer.isPaused && timer.pausedAt) {
+              const pauseStart = new Date(timer.pausedAt);
+              const currentPauseMs = now.getTime() - pauseStart.getTime();
+              totalPauseMs += currentPauseMs;
+            }
+            
+            // Вычисляем новое startTime на основе текущего времени и elapsed
+            const newStartTime = new Date(now.getTime() - (elapsed * 1000) - totalPauseMs)
+            
+            return timersApi.update(id, {
+              ...updateData,
+              startTime: newStartTime.toISOString()
+            })
+          }
+        }
+      }
+      
+      return timersApi.update(id, updateData)
+    },
     onSuccess: () => {
       if (projectId) {
         queryClient.invalidateQueries({ queryKey: ['project', projectId] })
       }
+      notifications.show({
+        title: 'Успешно',
+        message: 'Таймер обновлен',
+        color: 'green',
+      })
+    },
+    onError: (error) => {
+      console.error('Ошибка при обновлении таймера:', error)
+      notifications.show({
+        title: 'Ошибка',
+        message: 'Не удалось обновить таймер',
+        color: 'red',
+      })
     },
   })
 

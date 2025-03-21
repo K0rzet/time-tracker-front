@@ -36,5 +36,8 @@ export interface CreateTimerDto {
 
 export interface UpdateTimerDto {
   name?: string
+  description?: string
+  startTime?: string
   isPaid?: boolean
+  isLogged?: boolean
 } 
